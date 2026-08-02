@@ -1,0 +1,12 @@
+{
+  "name": "artnem-payment-system",
+  "version": "1.0.0",
+  "description": "Sistem Pencatatan Iuran Bulanan & Generator Tagihan WhatsApp - Artnem (Arek Erte Enem)",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx -y serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

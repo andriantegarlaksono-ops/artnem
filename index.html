@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artnem - Sistem Iuran Bulanan</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Artnem</h1>
+                    <span>Arek Erte Enem</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="members">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Data Anggota</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="payments">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>Pencatatan Iuran</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="wa-bills">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>Kirim Tagihan</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="backup">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span>Cadangan Data</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2026 Artnem RT 06</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="content-header">
+                <div class="header-title">
+                    <h2 id="page-title">Dashboard</h2>
+                    <p id="page-subtitle">Ringkasan status iuran RT 06</p>
+                </div>
+                <!-- Global Period Selector -->
+                <div class="period-selector-wrapper">
+                    <label for="global-period">Periode Iuran:</label>
+                    <div class="select-container">
+                        <select id="global-period">
+                            <!-- JS will populate options, e.g. last 6 months & next 6 months -->
+                        </select>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB: Dashboard -->
+            <section id="tab-dashboard" class="tab-panel active">
+                <!-- Metrics Grid -->
+                <div class="metrics-grid">
+                    <div class="metric-card gold-border">
+                        <div class="metric-info">
+                            <span class="metric-label">Total Uang Terkumpul</span>
+                            <h3 class="metric-value text-emerald" id="stat-total-collected">Rp 0</h3>
+                            <span class="metric-subtext" id="stat-period-name">Agustus 2026</span>
+                        </div>
+                        <div class="metric-icon bg-emerald-light text-emerald">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="10" x2="12" y2="10"/><path d="M16 14H8"/></svg>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <span class="metric-label">Total Anggota</span>
+                            <h3 class="metric-value" id="stat-total-members">0</h3>
+                            <span class="metric-subtext">Terdaftar</span>
+                        </div>
+                        <div class="metric-icon bg-blue-light text-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <span class="metric-label">Sudah Bayar</span>
+                            <h3 class="metric-value text-emerald" id="stat-paid-count">0</h3>
+                            <span class="metric-subtext" id="stat-paid-percentage">0% dari total</span>
+                        </div>
+                        <div class="metric-icon bg-emerald-light text-emerald">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-info">
+                            <span class="metric-label">Belum Bayar</span>
+                            <h3 class="metric-value text-rose" id="stat-unpaid-count">0</h3>
+                            <span class="metric-subtext" id="stat-unpaid-percentage">0% dari total</span>
+                        </div>
+                        <div class="metric-icon bg-rose-light text-rose">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Content Rows -->
+                <div class="dashboard-rows">
+                    <!-- Progress Card -->
+                    <div class="card card-half">
+                        <div class="card-header">
+                            <h3>Kemajuan Pembayaran</h3>
+                        </div>
+                        <div class="card-body progress-container">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="dashboard-progress-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span class="progress-text" id="dashboard-progress-text">0% Selesai</span>
+                                <span class="progress-details" id="dashboard-progress-detail">0 dari 0 Anggota</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Transactions -->
+                    <div class="card card-full">
+                        <div class="card-header">
+                            <h3>Aktivitas Pembayaran Terbaru</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table" id="table-recent-payments">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Anggota</th>
+                                            <th>Nominal</th>
+                                            <th>Tanggal Bayar</th>
+                                            <th>Catatan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- JS will populate -->
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">Belum ada data pembayaran terbaru</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Data Anggota -->
+            <section id="tab-members" class="tab-panel">
+                <div class="card">
+                    <div class="card-actions-header">
+                        <div class="search-box">
+                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="search-members-input" placeholder="Cari nama anggota...">
+                        </div>
+                        <button class="btn btn-emerald" id="btn-add-member">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <span>Tambah Anggota</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table" id="table-members">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Lengkap</th>
+                                        <th>No. WhatsApp</th>
+                                        <th>Nominal Iuran</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- JS will populate -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Pencatatan Iuran -->
+            <section id="tab-payments" class="tab-panel">
+                <div class="card">
+                    <div class="card-actions-header">
+                        <div class="search-box">
+                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="search-payments-input" placeholder="Cari nama...">
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="btn-filter active" data-filter="all">Semua</button>
+                            <button class="btn-filter" data-filter="paid">Lunas</button>
+                            <button class="btn-filter" data-filter="unpaid">Belum Bayar</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table" id="table-payments-registry">
+                                <thead>
+                                    <tr>
+                                        <th>Nama Anggota</th>
+                                        <th>Iuran Bulanan</th>
+                                        <th>Status</th>
+                                        <th>Tanggal Bayar</th>
+                                        <th>Catatan</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- JS will populate -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Kirim Tagihan -->
+            <section id="tab-wa-bills" class="tab-panel">
+                <div class="wa-bills-layout">
+                    <!-- Template Editor -->
+                    <div class="card wa-template-card">
+                        <div class="card-header">
+                            <h3>Pengaturan Template WhatsApp</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="wa-template-input">Isi Pesan Tagihan:</label>
+                                <textarea id="wa-template-input" rows="8" placeholder="Tulis template pesan di sini..."></textarea>
+                            </div>
+                            <div class="template-variables">
+                                <span class="var-label">Variabel Instan (Klik untuk memasukkan):</span>
+                                <div class="variable-chips">
+                                    <button class="chip" data-var="{nama}">{nama}</button>
+                                    <button class="chip" data-var="{nominal}">{nominal}</button>
+                                    <button class="chip" data-var="{bulan}">{bulan}</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-indigo btn-block" id="btn-save-template">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                <span>Simpan Template</span>
+                            </button>
+
+                            <div class="template-preview-box">
+                                <h4>Pratinjau Pesan Terformat:</h4>
+                                <div class="preview-content" id="template-preview-text">
+                                    <!-- Dynamic Preview -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unpaid List -->
+                    <div class="card wa-sender-card">
+                        <div class="card-header">
+                            <h3>Kirim Tagihan Anggota (Belum Bayar)</h3>
+                            <span class="unpaid-badge" id="wa-unpaid-badge-count">0 Anggota</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table" id="table-wa-sender">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Anggota</th>
+                                            <th>WhatsApp</th>
+                                            <th>Tagihan</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- JS will populate -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: Cadangan Data -->
+            <section id="tab-backup" class="tab-panel">
+                <div class="backup-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Ekspor & Impor Data</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="backup-desc">Data sistem ini disimpan di dalam browser laptop/HP Anda. Untuk mencegah kehilangan data akibat pembersihan browser, atau untuk memindahkan data ke perangkat lain, silakan gunakan fitur cadangan berikut.</p>
+                            
+                            <div class="backup-actions">
+                                <div class="backup-box">
+                                    <div class="backup-box-icon text-emerald">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </div>
+                                    <h4>Cadangkan Data (Ekspor)</h4>
+                                    <p>Unduh semua data anggota dan riwayat pembayaran saat ini dalam bentuk satu file JSON.</p>
+                                    <button class="btn btn-emerald" id="btn-export-data">Unduh File Cadangan</button>
+                                </div>
+
+                                <div class="backup-box">
+                                    <div class="backup-box-icon text-indigo">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <h4>Pulihkan Data (Impor)</h4>
+                                    <p>Unggah kembali file JSON hasil cadangan sebelumnya untuk memulihkan seluruh data sistem.</p>
+                                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                                    <button class="btn btn-indigo" id="btn-import-trigger">Pilih File & Pulihkan</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Tambah/Edit Anggota -->
+    <div class="modal" id="modal-member">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3 id="member-modal-title">Tambah Anggota Baru</h3>
+                <button class="close-btn" id="btn-close-member-modal">&times;</button>
+            </div>
+            <form id="form-member">
+                <input type="hidden" id="member-id-input">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="member-name-input">Nama Lengkap:</label>
+                        <input type="text" id="member-name-input" required placeholder="Contoh: Budi Santoso">
+                    </div>
+                    <div class="form-group">
+                        <label for="member-phone-input">Nomor WhatsApp:</label>
+                        <input type="tel" id="member-phone-input" required placeholder="Contoh: 081234567890">
+                        <small class="form-help">Bisa diawali dengan 0 atau 62 (otomatis dikonversi).</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="member-bill-input">Nominal Iuran Bulanan (Rp):</label>
+                        <input type="number" id="member-bill-input" required min="0" placeholder="Contoh: 50000">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-member-modal">Batal</button>
+                    <button type="submit" class="btn btn-emerald">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Konfirmasi Pembayaran (Lunas) -->
+    <div class="modal" id="modal-payment">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <h3>Pencatatan Pembayaran Iuran</h3>
+                <button class="close-btn" id="btn-close-payment-modal">&times;</button>
+            </div>
+            <form id="form-payment">
+                <input type="hidden" id="payment-member-id">
+                <div class="modal-body">
+                    <div class="payment-summary-info">
+                        <p>Mencatat iuran untuk <strong><span id="payment-member-name">Nama Anggota</span></strong></p>
+                        <p>Periode: <strong><span id="payment-period-display">Bulan Tahun</span></strong></p>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount-input">Jumlah Bayar (Rp):</label>
+                        <input type="number" id="payment-amount-input" required min="0" placeholder="50000">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-date-input">Tanggal Pembayaran:</label>
+                        <input type="date" id="payment-date-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-notes-input">Catatan Pembayaran (Opsional):</label>
+                        <input type="text" id="payment-notes-input" placeholder="Contoh: Transfer BNI, Cash, dll.">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-payment-modal">Batal</button>
+                    <button type="submit" class="btn btn-emerald">Simpan Pembayaran</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
