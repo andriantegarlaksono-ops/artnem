@@ -6,7 +6,7 @@
     --bg-card-hover: rgba(26, 36, 57, 0.8);
     --border-glass: rgba(255, 255, 255, 0.07);
     --border-glass-active: rgba(16, 185, 129, 0.3);
-    
+
     --text-primary: #f3f4f6;
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
@@ -14,17 +14,18 @@
     --color-emerald: #10b981;
     --color-emerald-hover: #059669;
     --color-emerald-glow: rgba(16, 185, 129, 0.15);
-    
+
     --color-indigo: #6366f1;
     --color-indigo-hover: #4f46e5;
-    
+
     --color-blue: #3b82f6;
     --color-blue-hover: #2563eb;
-    
+
     --color-rose: #ef4444;
     --color-rose-hover: #dc2626;
-    
-    --color-amber: #f59e0b; /* Gold Accent */
+
+    --color-amber: #f59e0b;
+    /* Gold Accent */
     --color-amber-glow: rgba(245, 158, 11, 0.2);
 
     --font-family: 'Plus Jakarta Sans', sans-serif;
@@ -48,7 +49,7 @@ body {
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
-    background-image: 
+    background-image:
         radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 40%);
     background-attachment: fixed;
@@ -230,8 +231,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* --- Dashboard Elements --- */
@@ -256,7 +264,7 @@ body {
 
 .metric-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 20px -10px rgba(0,0,0,0.5);
+    box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.5);
     background: var(--bg-card-hover);
 }
 
@@ -302,14 +310,33 @@ body {
     justify-content: center;
 }
 
-.bg-emerald-light { background: rgba(16, 185, 129, 0.1); }
-.bg-blue-light { background: rgba(59, 130, 246, 0.1); }
-.bg-rose-light { background: rgba(239, 68, 68, 0.1); }
+.bg-emerald-light {
+    background: rgba(16, 185, 129, 0.1);
+}
 
-.text-emerald { color: var(--color-emerald); }
-.text-blue { color: var(--color-blue); }
-.text-rose { color: var(--color-rose); }
-.text-indigo { color: var(--color-indigo); }
+.bg-blue-light {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.bg-rose-light {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.text-emerald {
+    color: var(--color-emerald);
+}
+
+.text-blue {
+    color: var(--color-blue);
+}
+
+.text-rose {
+    color: var(--color-rose);
+}
+
+.text-indigo {
+    color: var(--color-indigo);
+}
 
 /* --- Dashboard Rows --- */
 .dashboard-rows {
@@ -423,8 +450,13 @@ body {
     background-color: rgba(255, 255, 255, 0.015);
 }
 
-.text-center { text-align: center; }
-.text-muted { color: var(--text-muted); }
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--text-muted);
+}
 
 /* --- Badges --- */
 .badge {
@@ -652,7 +684,8 @@ body {
     color: var(--text-secondary);
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
     padding: 12px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-glass);
@@ -665,7 +698,8 @@ body {
     resize: vertical;
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
     border-color: var(--color-indigo);
     box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
     background: rgba(255, 255, 255, 0.04);
@@ -798,7 +832,7 @@ body {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: rgba(255,255,255, 0.02);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-glass);
     display: flex;
     align-items: center;
@@ -897,7 +931,7 @@ body {
 }
 
 .payment-summary-info {
-    background: rgba(255,255,255,0.02);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-glass);
     border-radius: var(--border-radius-sm);
     padding: 16px;
@@ -974,7 +1008,8 @@ body {
     }
 
     .logo-text span {
-        display: none; /* Hide subtitle to save screen space */
+        display: none;
+        /* Hide subtitle to save screen space */
     }
 
     /* Fixed Bottom Navigation (Premium Phone App Feel) */
@@ -1028,14 +1063,16 @@ body {
     }
 
     .sidebar-footer {
-        display: none; /* Hide footer in sidebar on mobile */
+        display: none;
+        /* Hide footer in sidebar on mobile */
     }
 
     /* Main Content Margins & Padding */
     .main-content {
         margin-left: 0;
         width: 100%;
-        padding: 16px 16px 84px 16px; /* 84px bottom spacing to prevent nav overlay */
+        padding: 16px 16px 84px 16px;
+        /* 84px bottom spacing to prevent nav overlay */
     }
 
     .content-header {
@@ -1057,7 +1094,8 @@ body {
 
     /* Compact Metrics Grid */
     .metrics-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+        grid-template-columns: repeat(2, 1fr);
+        /* 2 columns on mobile */
         gap: 10px;
         margin-bottom: 20px;
     }
@@ -1079,7 +1117,7 @@ body {
         top: 12px;
         right: 12px;
     }
-    
+
     .metric-icon svg {
         width: 18px;
         height: 18px;
@@ -1089,7 +1127,7 @@ body {
         font-size: 1.2rem;
         margin-top: 4px;
     }
-    
+
     .metric-label {
         font-size: 0.75rem;
         margin-bottom: 0;
@@ -1103,18 +1141,21 @@ body {
 
     /* Mobile Bottom Sheet Modals */
     .modal {
-        align-items: flex-end; /* Align modals to bottom */
+        align-items: flex-end;
+        /* Align modals to bottom */
     }
 
     .modal-content {
         max-width: 100%;
         width: 100%;
-        border-radius: 20px 20px 0 0; /* Rounded top corners only */
+        border-radius: 20px 20px 0 0;
+        /* Rounded top corners only */
         border-bottom: none;
         transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.32, 0.94, 0.6, 1);
         padding: 20px 16px;
-        padding-bottom: calc(16px + env(safe-area-inset-bottom, 24px)); /* Handle iPhone notch bottom spacing */
+        padding-bottom: calc(16px + env(safe-area-inset-bottom, 24px));
+        /* Handle iPhone notch bottom spacing */
     }
 
     .modal.open .modal-content {
@@ -1153,7 +1194,7 @@ body {
         padding: 8px 0;
         font-size: 0.75rem;
     }
-    
+
     .btn {
         width: 100%;
         justify-content: center;
@@ -1174,18 +1215,17 @@ body {
         grid-template-columns: 1fr;
         gap: 16px;
     }
-    
+
     .template-variables {
         margin-bottom: 12px;
     }
-    
+
     .variable-chips {
         gap: 6px;
     }
-    
+
     .chip {
         padding: 4px 10px;
         font-size: 0.7rem;
     }
 }
-
