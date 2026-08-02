@@ -235,10 +235,10 @@ function renderDashboard() {
             const memberName = member ? member.name : '[Anggota Terhapus]';
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td><strong>${memberName}</strong> <span class="text-muted" style="font-size:0.8rem">(${formatPeriod(pay.period)})</span></td>
-                <td class="text-emerald font-weight-600">${formatRupiah(pay.amount)}</td>
-                <td>${formatDate(pay.paidDate)}</td>
-                <td><span class="text-muted">${pay.notes || '-'}</span></td>
+                <td data-label="Nama Anggota"><strong>${memberName}</strong> <span class="text-muted" style="font-size:0.8rem">(${formatPeriod(pay.period)})</span></td>
+                <td data-label="Nominal" class="text-emerald font-weight-600">${formatRupiah(pay.amount)}</td>
+                <td data-label="Tanggal">${formatDate(pay.paidDate)}</td>
+                <td data-label="Catatan"><span class="text-muted">${pay.notes || '-'}</span></td>
             `;
             recentTableBody.appendChild(row);
         });
@@ -265,10 +265,10 @@ function renderMembersTable() {
     filteredMembers.forEach(member => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><strong>${member.name}</strong></td>
-            <td>${member.phone}</td>
-            <td>${formatRupiah(member.billAmount)}</td>
-            <td>
+            <td data-label="Nama Lengkap"><strong>${member.name}</strong></td>
+            <td data-label="No. WhatsApp">${member.phone}</td>
+            <td data-label="Nominal Iuran">${formatRupiah(member.billAmount)}</td>
+            <td data-label="Aksi">
                 <div class="action-buttons">
                     <button class="btn-icon-only edit" title="Edit Anggota" onclick="openEditMemberModal('${member.id}')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -335,12 +335,12 @@ function renderPaymentsRegistryTable() {
         }
 
         row.innerHTML = `
-            <td><strong>${item.member.name}</strong></td>
-            <td>${formatRupiah(item.member.billAmount)}</td>
-            <td>${statusBadge}</td>
-            <td>${paidDateText}</td>
-            <td>${notesText}</td>
-            <td>${actionBtn}</td>
+            <td data-label="Nama Anggota"><strong>${item.member.name}</strong></td>
+            <td data-label="Iuran Bulanan">${formatRupiah(item.member.billAmount)}</td>
+            <td data-label="Status">${statusBadge}</td>
+            <td data-label="Tanggal Bayar">${paidDateText}</td>
+            <td data-label="Catatan">${notesText}</td>
+            <td data-label="Aksi">${actionBtn}</td>
         `;
         tableBody.appendChild(row);
     });
@@ -376,10 +376,10 @@ function renderWaUnpaidTable() {
         const waLink = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(formattedMsg)}`;
 
         row.innerHTML = `
-            <td><strong>${member.name}</strong></td>
-            <td>${member.phone}</td>
-            <td class="text-rose font-weight-600">${formatRupiah(member.billAmount)}</td>
-            <td>
+            <td data-label="Nama Anggota"><strong>${member.name}</strong></td>
+            <td data-label="WhatsApp">${member.phone}</td>
+            <td data-label="Tagihan" class="text-rose font-weight-600">${formatRupiah(member.billAmount)}</td>
+            <td data-label="Aksi">
                 <a href="${waLink}" target="_blank" class="btn btn-emerald btn-sm">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <span>Kirim WA</span>
