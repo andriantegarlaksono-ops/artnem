@@ -20,7 +20,8 @@ const DEFAULT_PAYMENTS = [
 
 const DEFAULT_SETTINGS = {
     waTemplate: "Halo {nama},\n\nKami menginfokan tagihan iuran bulanan RT 06 (Artnem) untuk periode {bulan} sebesar {nominal}.\n\nPembayaran dapat ditransfer ke Rekening BNI 1234567890 a.n. Bendahara RT 06, atau diserahkan secara tunai.\n\nMohon abaikan pesan ini jika Anda sudah membayar. Terima kasih!\n\n-- Pengurus RT 06",
-    selectedMonth: '2026-08'
+    selectedMonth: '2026-08',
+    targetAmount: 300000
 };
 
 // --- Application State ---
@@ -30,6 +31,96 @@ let state = {
     settings: {},
     activePeriod: '2026-08'
 };
+
+// ============================================================
+// TOAST NOTIFICATION SYSTEM
+// ============================================================
+const TOAST_ICONS = {
+    success: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    error:   `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    info:    `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    warning: `<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+};
+
+function showToast(message, type = 'success', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `${TOAST_ICONS[type] || TOAST_ICONS.info}<span>${message}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('toast-out');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+}
+
+// ============================================================
+// CUSTOM CONFIRM DIALOG
+// ============================================================
+let _confirmResolver = null;
+
+function showConfirm(title, message, okLabel = 'Ya, Lanjutkan') {
+    return new Promise((resolve) => {
+        _confirmResolver = resolve;
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = message;
+        document.getElementById('btn-confirm-ok').textContent = okLabel;
+        document.getElementById('modal-confirm').classList.add('open');
+    });
+}
+
+function closeConfirmModal(result) {
+    document.getElementById('modal-confirm').classList.remove('open');
+    if (_confirmResolver) {
+        _confirmResolver(result);
+        _confirmResolver = null;
+    }
+}
+
+// ============================================================
+// AVATAR HELPER
+// ============================================================
+const AVATAR_COLORS = [
+    '#6366f1','#10b981','#3b82f6','#f59e0b','#ef4444',
+    '#8b5cf6','#06b6d4','#ec4899','#14b8a6','#f97316'
+];
+
+function getAvatarColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function makeAvatar(name) {
+    const initials = name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
+    const color = getAvatarColor(name);
+    return `<span class="member-avatar" style="background:${color}">${initials}</span>`;
+}
+
+// ============================================================
+// ANIMATE COUNTER
+// ============================================================
+function animateCounter(el, endValue, prefix = '', suffix = '', duration = 600) {
+    const startTime = performance.now();
+    const startValue = 0;
+    const isNumeric = typeof endValue === 'number';
+    if (!isNumeric) { el.textContent = prefix + endValue + suffix; return; }
+
+    el.classList.remove('animate-pop');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('animate-pop');
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        const current = Math.round(startValue + (endValue - startValue) * eased);
+        el.textContent = prefix + current.toLocaleString('id-ID') + suffix;
+        if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+}
 
 // --- Helper Functions ---
 
@@ -93,6 +184,9 @@ function loadState() {
         state.members = JSON.parse(storedMembers);
         state.payments = JSON.parse(storedPayments);
         state.settings = JSON.parse(storedSettings);
+        if (state.settings.targetAmount === undefined) {
+            state.settings.targetAmount = 300000;
+        }
     } else {
         // Initialize with default mock data
         state.members = DEFAULT_MEMBERS;
@@ -186,46 +280,64 @@ function renderAll() {
 function renderDashboard() {
     const activePeriodName = formatPeriod(state.activePeriod);
     document.getElementById('stat-period-name').textContent = activePeriodName;
+    const targetAmount = state.settings.targetAmount || 300000;
 
     // Calculations
     const totalMembers = state.members.length;
-    document.getElementById('stat-total-members').textContent = totalMembers;
 
     // Filter payments for this month
     const activePayments = state.payments.filter(p => p.period === state.activePeriod);
-    const paidCount = activePayments.length;
-    const unpaidCount = totalMembers - paidCount;
-    
-    const paidPercentage = totalMembers > 0 ? Math.round((paidCount / totalMembers) * 100) : 0;
-    const unpaidPercentage = totalMembers > 0 ? Math.round((unpaidCount / totalMembers) * 100) : 0;
 
-    // Update Counts
-    document.getElementById('stat-paid-count').textContent = paidCount;
-    document.getElementById('stat-paid-percentage').textContent = `${paidPercentage}% dari total`;
+    // Classify each member
+    let lunasCount = 0, partialCount = 0, noBayarCount = 0;
+    state.members.forEach(member => {
+        const memberPayments = activePayments.filter(p => p.memberId === member.id);
+        const totalPaid = memberPayments.reduce((sum, p) => sum + parseInt(p.amount, 10), 0);
+        if (totalPaid >= targetAmount) lunasCount++;
+        else if (totalPaid > 0) partialCount++;
+        else noBayarCount++;
+    });
+    const belumLunasCount = totalMembers - lunasCount;
 
-    document.getElementById('stat-unpaid-count').textContent = unpaidCount;
-    document.getElementById('stat-unpaid-percentage').textContent = `${unpaidPercentage}% dari total`;
+    const paidPercentage = totalMembers > 0 ? Math.round((lunasCount / totalMembers) * 100) : 0;
+    const unpaidPercentage = totalMembers > 0 ? Math.round((belumLunasCount / totalMembers) * 100) : 0;
 
     // Total Collected
     const totalCollected = activePayments.reduce((sum, p) => sum + parseInt(p.amount, 10), 0);
-    document.getElementById('stat-total-collected').textContent = formatRupiah(totalCollected);
+
+    // Animate counters
+    animateCounter(document.getElementById('stat-total-members'), totalMembers);
+    animateCounter(document.getElementById('stat-paid-count'), lunasCount);
+    animateCounter(document.getElementById('stat-unpaid-count'), belumLunasCount);
+
+    // Rupiah counter for total collected
+    const collectedEl = document.getElementById('stat-total-collected');
+    collectedEl.classList.remove('animate-pop');
+    void collectedEl.offsetWidth;
+    collectedEl.classList.add('animate-pop');
+    collectedEl.textContent = formatRupiah(totalCollected);
+
+    document.getElementById('stat-paid-percentage').textContent = `${paidPercentage}% dari total`;
+    document.getElementById('stat-unpaid-percentage').textContent = `${unpaidPercentage}% dari total`;
 
     // Progress Bar
     const progressFill = document.getElementById('dashboard-progress-fill');
-    const progressText = document.getElementById('dashboard-progress-text');
-    const progressDetail = document.getElementById('dashboard-progress-detail');
-
     progressFill.style.width = `${paidPercentage}%`;
-    progressText.textContent = `${paidPercentage}% Selesai`;
-    progressDetail.textContent = `${paidCount} dari ${totalMembers} Anggota`;
+    document.getElementById('dashboard-progress-text').textContent = `${paidPercentage}% Selesai`;
+    document.getElementById('dashboard-progress-detail').textContent = `${lunasCount} dari ${totalMembers} Anggota Lunas`;
+
+    // Populate target amount input
+    const targetInput = document.getElementById('dashboard-target-amount');
+    if (targetInput) targetInput.value = targetAmount;
+
+    // Donut Chart
+    renderDonutChart(lunasCount, partialCount, noBayarCount, totalMembers, paidPercentage);
 
     // Recent Payments
     const recentTableBody = document.querySelector('#table-recent-payments tbody');
     recentTableBody.innerHTML = '';
-
-    // Sort payments by date descending
     const sortedPayments = [...state.payments].sort((a, b) => new Date(b.paidDate) - new Date(a.paidDate));
-    const recentList = sortedPayments.slice(0, 5); // top 5 recent across all months
+    const recentList = sortedPayments.slice(0, 5);
 
     if (recentList.length === 0) {
         recentTableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Belum ada data pembayaran terbaru</td></tr>';
@@ -245,31 +357,73 @@ function renderDashboard() {
     }
 }
 
+// Donut Chart Renderer
+function renderDonutChart(lunas, partial, noBayar, total, pct) {
+    const circumference = 2 * Math.PI * 48; // r=48 → ~301.59
+    const donutPaid    = document.getElementById('donut-paid');
+    const donutPartial = document.getElementById('donut-partial');
+    const donutPct     = document.getElementById('donut-pct');
+
+    if (!donutPaid) return;
+
+    if (total === 0) {
+        donutPaid.style.strokeDasharray    = `0 ${circumference}`;
+        donutPartial.style.strokeDasharray = `0 ${circumference}`;
+        donutPct.textContent = '0%';
+    } else {
+        const paidFrac    = lunas   / total;
+        const partialFrac = partial / total;
+        const paidLen    = paidFrac * circumference;
+        const partialLen = partialFrac * circumference;
+
+        // Paid arc: starts from top (offset = circ*0.25)
+        donutPaid.style.strokeDasharray    = `${paidLen} ${circumference - paidLen}`;
+        donutPaid.style.strokeDashoffset   = `${circumference * 0.25}`;
+
+        // Partial arc: starts right after paid arc
+        donutPartial.style.strokeDasharray    = `${partialLen} ${circumference - partialLen}`;
+        donutPartial.style.strokeDashoffset   = `${circumference * 0.25 - paidLen}`;
+    }
+
+    donutPct.textContent = `${pct}%`;
+    document.getElementById('legend-paid-count').textContent    = lunas;
+    document.getElementById('legend-partial-count').textContent = partial;
+    document.getElementById('legend-unpaid-count').textContent  = noBayar;
+}
+
 // 2. Members Tab
 function renderMembersTable() {
     const tableBody = document.querySelector('#table-members tbody');
     tableBody.innerHTML = '';
     const searchQuery = document.getElementById('search-members-input').value.toLowerCase();
 
-    // Filter members based on search
     const filteredMembers = state.members.filter(member => 
         member.name.toLowerCase().includes(searchQuery) || 
         member.phone.includes(searchQuery)
     );
 
     if (filteredMembers.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada data anggota</td></tr>';
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding:40px 0;">Tidak ada data anggota</td></tr>`;
         return;
     }
 
-    filteredMembers.forEach(member => {
+    filteredMembers.forEach((member, idx) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td data-label="Nama Lengkap"><strong>${member.name}</strong></td>
+            <td class="col-no" data-label="No.">${idx + 1}</td>
+            <td data-label="Nama Lengkap">
+                <div class="member-name-cell">
+                    ${makeAvatar(member.name)}
+                    <strong>${member.name}</strong>
+                </div>
+            </td>
             <td data-label="No. WhatsApp">${member.phone}</td>
             <td data-label="Nominal Iuran">${formatRupiah(member.billAmount)}</td>
             <td data-label="Aksi">
                 <div class="action-buttons">
+                    <button class="btn-icon-only" title="Histori Iuran" onclick="openHistoryModal('${member.id}')" style="color:var(--color-indigo);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg>
+                    </button>
                     <button class="btn-icon-only edit" title="Edit Anggota" onclick="openEditMemberModal('${member.id}')">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </button>
@@ -289,16 +443,22 @@ function renderPaymentsRegistryTable() {
     const tableBody = document.querySelector('#table-payments-registry tbody');
     tableBody.innerHTML = '';
     const searchQuery = document.getElementById('search-payments-input').value.toLowerCase();
+    const targetAmount = state.settings.targetAmount || 300000;
 
     const activePayments = state.payments.filter(p => p.period === state.activePeriod);
 
-    // Map members to their status
+    // Map members to their status with accumulated payment totals
     let data = state.members.map(member => {
-        const paymentRecord = activePayments.find(p => p.memberId === member.id);
+        const memberPayments = activePayments.filter(p => p.memberId === member.id);
+        const totalPaid = memberPayments.reduce((sum, p) => sum + parseInt(p.amount, 10), 0);
+        const isLunas = totalPaid >= targetAmount;
+        const hasPayment = memberPayments.length > 0;
         return {
             member,
-            isPaid: !!paymentRecord,
-            paymentRecord
+            memberPayments,
+            totalPaid,
+            isLunas,
+            hasPayment
         };
     });
 
@@ -309,38 +469,64 @@ function renderPaymentsRegistryTable() {
 
     // Apply Filter Button Selection
     if (currentFilter === 'paid') {
-        data = data.filter(item => item.isPaid);
+        data = data.filter(item => item.isLunas);
     } else if (currentFilter === 'unpaid') {
-        data = data.filter(item => !item.isPaid);
+        data = data.filter(item => !item.isLunas);
     }
 
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Tidak ada data iuran ditemukan</td></tr>';
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding:40px 0;">Tidak ada data iuran ditemukan</td></tr>`;
         return;
     }
 
-    data.forEach(item => {
+    data.forEach((item, idx) => {
         const row = document.createElement('tr');
-        
-        let statusBadge = `<span class="badge badge-unpaid">Belum Bayar</span>`;
-        let paidDateText = '-';
-        let notesText = '-';
-        let actionBtn = `<button class="btn btn-emerald btn-sm" onclick="openPaymentModal('${item.member.id}')">Tandai Lunas</button>`;
+        const nominalDisplay = `<span style="font-weight:600">${formatRupiah(item.totalPaid)}</span><span class="text-muted"> / ${formatRupiah(targetAmount)}</span>`;
 
-        if (item.isPaid) {
-            statusBadge = `<span class="badge badge-paid">Lunas</span>`;
-            paidDateText = formatDate(item.paymentRecord.paidDate);
-            notesText = `<span class="text-muted">${item.paymentRecord.notes || '-'}</span>`;
-            actionBtn = `<button class="btn btn-secondary btn-sm" onclick="voidPayment('${item.paymentRecord.id}')">Batalkan</button>`;
+        let statusBadge;
+        let actionBtn;
+
+        if (item.isLunas) {
+            statusBadge = `<span class="badge badge-paid">✓ Lunas</span>`;
+            actionBtn = `
+                <div style="display:flex; gap:6px; flex-direction:column; align-items:flex-start;">
+                    ${item.memberPayments.map(p => `
+                        <div style="display:flex; gap:6px; align-items:center; font-size:0.8rem;">
+                            <span class="text-muted">${formatDate(p.paidDate)}: <strong>${formatRupiah(p.amount)}</strong>${p.notes ? ' · '+p.notes : ''}</span>
+                            <button class="btn-icon-only delete" title="Hapus pembayaran ini" onclick="voidPayment('${p.id}')" style="width:24px;height:24px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-secondary btn-sm" onclick="openPaymentModal('${item.member.id}')">+ Tambah</button>
+                </div>`;
+        } else if (item.hasPayment) {
+            statusBadge = `<span class="badge badge-partial">⏳ Belum Lunas</span>`;
+            actionBtn = `
+                <div style="display:flex; gap:6px; flex-direction:column; align-items:flex-start;">
+                    ${item.memberPayments.map(p => `
+                        <div style="display:flex; gap:6px; align-items:center; font-size:0.8rem;">
+                            <span class="text-muted">${formatDate(p.paidDate)}: <strong>${formatRupiah(p.amount)}</strong>${p.notes ? ' · '+p.notes : ''}</span>
+                            <button class="btn-icon-only delete" title="Hapus pembayaran ini" onclick="voidPayment('${p.id}')" style="width:24px;height:24px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-emerald btn-sm" onclick="openPaymentModal('${item.member.id}')">Lunasi Sisa (${formatRupiah(targetAmount - item.totalPaid)})</button>
+                </div>`;
+        } else {
+            statusBadge = `<span class="badge badge-unpaid">✗ Belum Bayar</span>`;
+            actionBtn = `<button class="btn btn-emerald btn-sm" onclick="openPaymentModal('${item.member.id}')">Catat Bayar</button>`;
         }
 
         row.innerHTML = `
-            <td data-label="Nama Anggota"><strong>${item.member.name}</strong></td>
-            <td data-label="Iuran Bulanan">${formatRupiah(item.member.billAmount)}</td>
+            <td class="col-no" data-label="No.">${idx + 1}</td>
+            <td data-label="Nama Anggota">
+                <div class="member-name-cell">${makeAvatar(item.member.name)}<strong>${item.member.name}</strong></div>
+            </td>
+            <td data-label="Iuran Terbayar">${nominalDisplay}</td>
             <td data-label="Status">${statusBadge}</td>
-            <td data-label="Tanggal Bayar">${paidDateText}</td>
-            <td data-label="Catatan">${notesText}</td>
-            <td data-label="Aksi">${actionBtn}</td>
+            <td data-label="Aksi" style="white-space:normal; min-width:200px;">${actionBtn}</td>
         `;
         tableBody.appendChild(row);
     });
@@ -350,45 +536,73 @@ function renderPaymentsRegistryTable() {
 function renderWaUnpaidTable() {
     const tableBody = document.querySelector('#table-wa-sender tbody');
     tableBody.innerHTML = '';
+    const targetAmount = state.settings.targetAmount || 300000;
 
     const activePayments = state.payments.filter(p => p.period === state.activePeriod);
-    const unpaidMembers = state.members.filter(member => {
-        return !activePayments.some(p => p.memberId === member.id);
-    });
+
+    // Filter members whose total paid < targetAmount
+    const belumLunasMembers = state.members.map(member => {
+        const totalPaid = activePayments
+            .filter(p => p.memberId === member.id)
+            .reduce((sum, p) => sum + parseInt(p.amount, 10), 0);
+        const remaining = targetAmount - totalPaid;
+        return { member, totalPaid, remaining };
+    }).filter(item => item.remaining > 0);
 
     // Update unpaid badge count
-    document.getElementById('wa-unpaid-badge-count').textContent = `${unpaidMembers.length} Anggota`;
+    document.getElementById('wa-unpaid-badge-count').textContent = `${belumLunasMembers.length} Anggota`;
 
-    if (unpaidMembers.length === 0) {
+    if (belumLunasMembers.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Semua anggota sudah lunas untuk periode ini! 🎉</td></tr>';
         return;
     }
 
-    unpaidMembers.forEach(member => {
+    belumLunasMembers.forEach(({ member, totalPaid, remaining }) => {
         const row = document.createElement('tr');
         
-        // Generate pre-filled message text
         const periodName = formatPeriod(state.activePeriod);
-        const formattedMsg = parseTemplate(state.settings.waTemplate, member.name, member.billAmount, periodName);
+        const formattedMsg = parseTemplate(state.settings.waTemplate, member.name, remaining, periodName);
         const cleanPhone = cleanPhoneNumber(member.phone);
-        
-        // WhatsApp link
         const waLink = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(formattedMsg)}`;
+        const paidInfo = totalPaid > 0 ? `<br><span class="text-muted" style="font-size:0.78rem">Terbayar: ${formatRupiah(totalPaid)}</span>` : '';
+        const safeMsg = formattedMsg.replace(/'/g, "\\'").replace(/\n/g, '\\n');
 
         row.innerHTML = `
-            <td data-label="Nama Anggota"><strong>${member.name}</strong></td>
+            <td data-label="Nama Anggota">
+                <div class="member-name-cell">${makeAvatar(member.name)}<strong>${member.name}</strong></div>
+            </td>
             <td data-label="WhatsApp">${member.phone}</td>
-            <td data-label="Tagihan" class="text-rose font-weight-600">${formatRupiah(member.billAmount)}</td>
+            <td data-label="Sisa Tagihan" class="text-rose font-weight-600">${formatRupiah(remaining)}${paidInfo}</td>
             <td data-label="Aksi">
-                <a href="${waLink}" target="_blank" class="btn btn-emerald btn-sm">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    <span>Kirim WA</span>
-                </a>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <a href="${waLink}" target="_blank" class="btn btn-emerald btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <span>Kirim WA</span>
+                    </a>
+                    <button class="btn btn-copy btn-sm" onclick="copyWaMessage(this, '${safeMsg}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                        <span>Salin</span>
+                    </button>
+                </div>
             </td>
         `;
         tableBody.appendChild(row);
     });
 }
+
+// Copy WA Message to Clipboard
+window.copyWaMessage = function(btn, msg) {
+    const text = msg.replace(/\\n/g, '\n');
+    navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        btn.querySelector('span').textContent = 'Tersalin!';
+        showToast('Pesan berhasil disalin ke clipboard!', 'success', 2000);
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.querySelector('span').textContent = 'Salin';
+        }, 2000);
+    }).catch(() => showToast('Gagal menyalin pesan.', 'error'));
+};
 
 // Template Input Preview Live Update
 function updateTemplatePreview() {
@@ -459,21 +673,25 @@ function handleMemberFormSubmit(e) {
     saveStateToLocalStorage();
     closeMemberModal();
     renderAll();
+    showToast(id ? `Data "${name}" berhasil diperbarui.` : `Anggota "${name}" berhasil ditambahkan!`, 'success');
 }
 
-window.deleteMember = function(memberId) {
+window.deleteMember = async function(memberId) {
     const member = state.members.find(m => m.id === memberId);
     if (!member) return;
 
-    if (confirm(`Apakah Anda yakin ingin menghapus anggota "${member.name}"? Semua data pembayarannya juga akan dihapus.`)) {
-        // Remove member
-        state.members = state.members.filter(m => m.id !== memberId);
-        // Clean up payments
-        state.payments = state.payments.filter(p => p.memberId !== memberId);
-        
-        saveStateToLocalStorage();
-        renderAll();
-    }
+    const ok = await showConfirm(
+        'Hapus Anggota',
+        `Apakah Anda yakin ingin menghapus "${member.name}"? Semua riwayat pembayarannya juga akan terhapus.`,
+        'Ya, Hapus'
+    );
+    if (!ok) return;
+
+    state.members = state.members.filter(m => m.id !== memberId);
+    state.payments = state.payments.filter(p => p.memberId !== memberId);
+    saveStateToLocalStorage();
+    renderAll();
+    showToast(`Anggota "${member.name}" berhasil dihapus.`, 'info');
 };
 
 // --- Payment Modal Actions ---
@@ -482,16 +700,20 @@ window.openPaymentModal = function(memberId) {
     const member = state.members.find(m => m.id === memberId);
     if (!member) return;
 
+    const targetAmount = state.settings.targetAmount || 300000;
+    const activePayments = state.payments.filter(p => p.period === state.activePeriod && p.memberId === memberId);
+    const totalPaid = activePayments.reduce((sum, p) => sum + parseInt(p.amount, 10), 0);
+    const remaining = Math.max(0, targetAmount - totalPaid);
+
     document.getElementById('payment-member-id').value = memberId;
     document.getElementById('payment-member-name').textContent = member.name;
     document.getElementById('payment-period-display').textContent = formatPeriod(state.activePeriod);
     
-    // Pre-fill amount with member's default bill
-    document.getElementById('payment-amount-input').value = member.billAmount;
+    // Pre-fill amount with remaining balance (or member's bill if no payments yet)
+    document.getElementById('payment-amount-input').value = remaining > 0 ? remaining : member.billAmount;
     
-    // Pre-fill date with today (2026-08-02 based on system context date)
+    // Pre-fill date with today
     const today = new Date();
-    // Safely format today to YYYY-MM-DD
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -525,34 +747,81 @@ function handlePaymentFormSubmit(e) {
     saveStateToLocalStorage();
     closePaymentModal();
     renderAll();
+    showToast('Pembayaran berhasil dicatat! 💰', 'success');
 }
 
-window.voidPayment = function(paymentId) {
+window.voidPayment = async function(paymentId) {
     const payment = state.payments.find(p => p.id === paymentId);
     if (!payment) return;
 
     const member = state.members.find(m => m.id === payment.memberId);
     const memberName = member ? member.name : 'Anggota';
 
-    if (confirm(`Apakah Anda yakin ingin membatalkan status LUNAS untuk ${memberName} pada periode ${formatPeriod(payment.period)}?`)) {
-        state.payments = state.payments.filter(p => p.id !== paymentId);
-        saveStateToLocalStorage();
-        renderAll();
-    }
+    const ok = await showConfirm(
+        'Hapus Catatan Bayar',
+        `Hapus pembayaran ${formatRupiah(payment.amount)} untuk ${memberName} pada ${formatDate(payment.paidDate)}?`,
+        'Ya, Hapus'
+    );
+    if (!ok) return;
+
+    state.payments = state.payments.filter(p => p.id !== paymentId);
+    saveStateToLocalStorage();
+    renderAll();
+    showToast('Catatan pembayaran berhasil dihapus.', 'info');
 };
+
+// --- Histori Iuran per Anggota ---
+window.openHistoryModal = function(memberId) {
+    const member = state.members.find(m => m.id === memberId);
+    if (!member) return;
+
+    document.getElementById('history-modal-title').textContent = `Histori Iuran — ${member.name}`;
+    document.getElementById('history-modal-subtitle').textContent = member.phone;
+
+    const memberPayments = state.payments
+        .filter(p => p.memberId === memberId)
+        .sort((a, b) => b.period.localeCompare(a.period) || new Date(b.paidDate) - new Date(a.paidDate));
+
+    const tbody = document.querySelector('#table-history tbody');
+    tbody.innerHTML = '';
+
+    if (memberPayments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted" style="padding:30px 0;">Belum ada riwayat pembayaran</td></tr>`;
+        document.getElementById('history-total-summary').innerHTML = '';
+    } else {
+        const grandTotal = memberPayments.reduce((s, p) => s + parseInt(p.amount, 10), 0);
+        memberPayments.forEach(p => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td data-label="Periode"><strong>${formatPeriod(p.period)}</strong></td>
+                <td data-label="Jumlah Bayar" class="text-emerald" style="font-weight:600">${formatRupiah(p.amount)}</td>
+                <td data-label="Tanggal">${formatDate(p.paidDate)}</td>
+                <td data-label="Catatan"><span class="text-muted">${p.notes || '-'}</span></td>
+            `;
+            tbody.appendChild(row);
+        });
+        document.getElementById('history-total-summary').innerHTML =
+            `Total: <strong>${formatRupiah(grandTotal)}</strong> dari ${memberPayments.length} transaksi`;
+    }
+
+    document.getElementById('modal-history').classList.add('open');
+};
+
+function closeHistoryModal() {
+    document.getElementById('modal-history').classList.remove('open');
+}
 
 // --- Backup & Restore Data Functions ---
 
 function exportData() {
     const dataStr = JSON.stringify(state, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
     const exportFileDefaultName = `artnem_backup_${state.activePeriod}_${new Date().toISOString().slice(0, 10)}.json`;
-    
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+    showToast('File cadangan berhasil diunduh!', 'success');
 }
 
 function triggerImportFileInput() {
@@ -564,36 +833,37 @@ function handleImportFile(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    fileReader.onload = function(event) {
+    fileReader.onload = async function(event) {
         try {
             const parsedData = JSON.parse(event.target.result);
             
-            // Validation
             if (!parsedData.members || !Array.isArray(parsedData.members) ||
                 !parsedData.payments || !Array.isArray(parsedData.payments) ||
                 !parsedData.settings) {
-                alert("Format berkas cadangan tidak valid. Berkas harus berisi data anggota, pembayaran, dan pengaturan.");
+                showToast('Format berkas cadangan tidak valid.', 'error');
                 return;
             }
 
-            if (confirm("Apakah Anda yakin ingin memulihkan data? Data saat ini di browser Anda akan sepenuhnya digantikan oleh data dari berkas cadangan ini.")) {
-                state.members = parsedData.members;
-                state.payments = parsedData.payments;
-                state.settings = parsedData.settings;
-                state.activePeriod = state.settings.selectedMonth || '2026-08';
-                
-                saveStateToLocalStorage();
-                alert("Data berhasil dipulihkan!");
-                
-                // Reset file input
-                e.target.value = '';
-                
-                // Re-initialize and render
-                initPeriodOptions();
-                renderAll();
-            }
+            const ok = await showConfirm(
+                'Pulihkan Data',
+                'Data saat ini akan digantikan oleh data dari file cadangan. Proses ini tidak dapat diurungkan.',
+                'Ya, Pulihkan'
+            );
+            if (!ok) return;
+
+            state.members = parsedData.members;
+            state.payments = parsedData.payments;
+            state.settings = parsedData.settings;
+            state.activePeriod = state.settings.selectedMonth || '2026-08';
+            
+            saveStateToLocalStorage();
+            showToast(`Data berhasil dipulihkan! ${parsedData.members.length} anggota dimuat.`, 'success');
+            
+            e.target.value = '';
+            initPeriodOptions();
+            renderAll();
         } catch (err) {
-            alert("Gagal membaca berkas JSON: " + err.message);
+            showToast('Gagal membaca berkas JSON: ' + err.message, 'error');
         }
     };
     fileReader.readAsText(file);
@@ -621,8 +891,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-save-template').addEventListener('click', () => {
         state.settings.waTemplate = templateInput.value;
         saveStateToLocalStorage();
-        alert("Template pesan WhatsApp berhasil disimpan!");
-        renderWaUnpaidTable(); // update WA list links with new template
+        showToast('Template pesan WhatsApp berhasil disimpan!', 'success');
+        renderWaUnpaidTable();
     });
 
     // Helper Variable Chips insertion
@@ -658,6 +928,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // 4.5 Target Amount Setting
+    const btnSaveTarget = document.getElementById('btn-save-target');
+    if (btnSaveTarget) {
+        btnSaveTarget.addEventListener('click', () => {
+            const input = document.getElementById('dashboard-target-amount');
+            const newTarget = parseInt(input.value, 10);
+            if (isNaN(newTarget) || newTarget < 0) {
+                showToast('Masukkan nominal target yang valid.', 'warning');
+                return;
+            }
+            state.settings.targetAmount = newTarget;
+            saveStateToLocalStorage();
+            renderAll();
+            showToast(`Target iuran diset ke ${formatRupiah(newTarget)}`, 'success');
+        });
+    }
+
     // 5. Modal Binding
     // Member Modal
     document.getElementById('btn-add-member').addEventListener('click', openAddMemberModal);
@@ -675,12 +962,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-import-trigger').addEventListener('click', triggerImportFileInput);
     document.getElementById('import-file-input').addEventListener('change', handleImportFile);
 
+    // 7. Confirm Modal Bindings
+    document.getElementById('btn-confirm-cancel').addEventListener('click', () => closeConfirmModal(false));
+    document.getElementById('btn-confirm-ok').addEventListener('click', () => closeConfirmModal(true));
+
+    // 8. History Modal Bindings
+    document.getElementById('btn-close-history-modal').addEventListener('click', closeHistoryModal);
+    document.getElementById('btn-close-history-footer').addEventListener('click', closeHistoryModal);
+
     // Close modals on clicking background
     window.addEventListener('click', (e) => {
-        const memberModal = document.getElementById('modal-member');
+        const memberModal  = document.getElementById('modal-member');
         const paymentModal = document.getElementById('modal-payment');
-        if (e.target === memberModal) closeMemberModal();
+        const historyModal = document.getElementById('modal-history');
+        const confirmModal = document.getElementById('modal-confirm');
+        if (e.target === memberModal)  closeMemberModal();
         if (e.target === paymentModal) closePaymentModal();
+        if (e.target === historyModal) closeHistoryModal();
+        if (e.target === confirmModal) closeConfirmModal(false);
     });
 
     // 7. Initial Render

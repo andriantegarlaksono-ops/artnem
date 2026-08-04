@@ -481,6 +481,12 @@ body {
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.badge-partial {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-amber);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
 /* --- Buttons & Inputs --- */
 .btn {
     display: inline-flex;
@@ -1274,4 +1280,340 @@ body {
         padding: 4px 10px;
         font-size: 0.7rem;
     }
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glass);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    max-width: 340px;
+    pointer-events: all;
+    box-shadow: 0 8px 24px -6px rgba(0,0,0,0.5);
+    animation: toastSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.toast-out {
+    animation: toastSlideOut 0.3s ease forwards;
+}
+
+.toast::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    animation: toastProgress 3s linear forwards;
+    border-radius: 0 0 12px 12px;
+}
+
+.toast-success {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.25);
+}
+.toast-success::after { background: var(--color-emerald); }
+
+.toast-error {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.25);
+}
+.toast-error::after { background: var(--color-rose); }
+
+.toast-info {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.25);
+}
+.toast-info::after { background: var(--color-indigo); }
+
+.toast-warning {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.25);
+}
+.toast-warning::after { background: var(--color-amber); }
+
+.toast-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+}
+
+.toast-success .toast-icon { color: var(--color-emerald); }
+.toast-error .toast-icon { color: var(--color-rose); }
+.toast-info .toast-icon { color: var(--color-indigo); }
+.toast-warning .toast-icon { color: var(--color-amber); }
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(110%) scale(0.9); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes toastSlideOut {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to   { opacity: 0; transform: translateX(110%) scale(0.9); }
+}
+@keyframes toastProgress {
+    from { width: 100%; }
+    to   { width: 0%; }
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        top: auto;
+        bottom: 80px;
+        right: 12px;
+        left: 12px;
+    }
+    .toast {
+        max-width: 100%;
+    }
+}
+
+/* ============================================================
+   CUSTOM CONFIRM MODAL
+   ============================================================ */
+.modal-confirm-content {
+    max-width: 380px !important;
+    text-align: center;
+    padding: 32px 28px !important;
+}
+
+.modal-confirm-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+    color: var(--color-rose);
+}
+
+.modal-confirm-content h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.modal-confirm-content p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 28px;
+}
+
+.modal-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-confirm-actions .btn {
+    flex: 1;
+    max-width: 140px;
+}
+
+/* ============================================================
+   DONUT CHART
+   ============================================================ */
+.donut-chart-row {
+    margin-bottom: 24px;
+}
+
+.donut-chart-card {
+    padding: 20px 24px;
+}
+
+.donut-chart-body {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.donut-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.donut-wrapper svg {
+    transform: rotate(-90deg);
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.15));
+}
+
+.donut-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.donut-center-text span {
+    display: block;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+.donut-center-text small {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.legend-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .donut-chart-body {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+    .donut-legend {
+        width: 100%;
+        flex-direction: row;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .legend-item {
+        gap: 6px;
+    }
+}
+
+/* ============================================================
+   ANIMASI COUNTER
+   ============================================================ */
+@keyframes numberPop {
+    0%   { transform: scale(0.7); opacity: 0; }
+    70%  { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.metric-value.animate-pop {
+    animation: numberPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ============================================================
+   HISTORI IURAN MODAL
+   ============================================================ */
+.history-total {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.history-total strong {
+    color: var(--color-emerald);
+}
+
+/* ============================================================
+   NOMOR URUT COLUMN
+   ============================================================ */
+.table td.col-no,
+.table th.col-no {
+    width: 40px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* ============================================================
+   TOMBOL SALIN PESAN
+   ============================================================ */
+.btn-copy {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: var(--color-amber);
+    transition: all var(--transition-speed);
+}
+.btn-copy:hover {
+    background: rgba(245, 158, 11, 0.2);
+    transform: translateY(-1px);
+}
+.btn-copy.copied {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.25);
+    color: var(--color-emerald);
+}
+
+/* ============================================================
+   AVATAR INISIAL
+   ============================================================ */
+.member-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #fff;
+    letter-spacing: 0;
+}
+
+.member-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }

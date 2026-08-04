@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +8,81 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Custom Confirm Modal -->
+    <div class="modal" id="modal-confirm">
+        <div class="modal-content modal-confirm-content glass">
+            <div class="modal-confirm-icon" id="confirm-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+            </div>
+            <h3 id="confirm-title">Konfirmasi</h3>
+            <p id="confirm-message">Apakah Anda yakin?</p>
+            <div class="modal-confirm-actions">
+                <button class="btn btn-secondary" id="btn-confirm-cancel">Batal</button>
+                <button class="btn btn-rose" id="btn-confirm-ok">Ya, Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Histori Iuran per Anggota -->
+    <div class="modal" id="modal-history">
+        <div class="modal-content glass" style="max-width: 560px;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="history-modal-title">Histori Iuran</h3>
+                    <p id="history-modal-subtitle" style="font-size:0.8rem; color: var(--text-muted); margin-top:2px;">
+                    </p>
+                </div>
+                <button class="close-btn" id="btn-close-history-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table" id="table-history">
+                        <thead>
+                            <tr>
+                                <th>Periode</th>
+                                <th>Jumlah Bayar</th>
+                                <th>Tanggal</th>
+                                <th>Catatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- JS will populate -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div id="history-total-summary" class="history-total"></div>
+                <button type="button" class="btn btn-secondary" id="btn-close-history-footer">Tutup</button>
+            </div>
+        </div>
+    </div>
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
                     </svg>
                 </div>
                 <div class="logo-text">
@@ -30,23 +93,47 @@
 
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-tab="dashboard">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
                     <span>Dashboard</span>
                 </a>
                 <a href="#" class="nav-item" data-tab="members">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
                     <span>Data Anggota</span>
                 </a>
                 <a href="#" class="nav-item" data-tab="payments">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23" />
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
                     <span>Pencatatan Iuran</span>
                 </a>
                 <a href="#" class="nav-item" data-tab="wa-bills">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
                     <span>Kirim Tagihan</span>
                 </a>
                 <a href="#" class="nav-item" data-tab="backup">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
                     <span>Cadangan Data</span>
                 </a>
             </nav>
@@ -85,7 +172,12 @@
                             <span class="metric-subtext" id="stat-period-name">Agustus 2026</span>
                         </div>
                         <div class="metric-icon bg-emerald-light text-emerald">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="10" x2="12" y2="10"/><path d="M16 14H8"/></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <line x1="12" y1="10" x2="12" y2="10" />
+                                <path d="M16 14H8" />
+                            </svg>
                         </div>
                     </div>
                     <div class="metric-card">
@@ -95,7 +187,11 @@
                             <span class="metric-subtext">Terdaftar</span>
                         </div>
                         <div class="metric-icon bg-blue-light text-blue">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                            </svg>
                         </div>
                     </div>
                     <div class="metric-card">
@@ -105,7 +201,11 @@
                             <span class="metric-subtext" id="stat-paid-percentage">0% dari total</span>
                         </div>
                         <div class="metric-icon bg-emerald-light text-emerald">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                            </svg>
                         </div>
                     </div>
                     <div class="metric-card">
@@ -115,25 +215,101 @@
                             <span class="metric-subtext" id="stat-unpaid-percentage">0% dari total</span>
                         </div>
                         <div class="metric-icon bg-rose-light text-rose">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Donut Chart Row -->
+                <div class="donut-chart-row">
+                    <div class="card donut-chart-card" style="margin-bottom:0;">
+                        <div class="card-header">
+                            <h3>Distribusi Pembayaran</h3>
+                        </div>
+                        <div class="card-body donut-chart-body">
+                            <div class="donut-wrapper">
+                                <svg id="donut-svg" viewBox="0 0 120 120" width="120" height="120">
+                                    <circle id="donut-bg" cx="60" cy="60" r="48" fill="none"
+                                        stroke="rgba(255,255,255,0.05)" stroke-width="18" />
+                                    <circle id="donut-paid" cx="60" cy="60" r="48" fill="none"
+                                        stroke="var(--color-emerald)" stroke-width="18" stroke-dasharray="0 301.59"
+                                        stroke-dashoffset="75.4" stroke-linecap="round"
+                                        style="transition: stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1);" />
+                                    <circle id="donut-partial" cx="60" cy="60" r="48" fill="none"
+                                        stroke="var(--color-amber)" stroke-width="18" stroke-dasharray="0 301.59"
+                                        stroke-dashoffset="75.4" stroke-linecap="round"
+                                        style="transition: stroke-dasharray 0.8s cubic-bezier(0.4,0,0.2,1); transition-delay:0.1s;" />
+                                </svg>
+                                <div class="donut-center-text">
+                                    <span id="donut-pct">0%</span>
+                                    <small>Lunas</small>
+                                </div>
+                            </div>
+                            <div class="donut-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: var(--color-emerald);"></span>
+                                    <span class="legend-label">Lunas</span>
+                                    <span class="legend-value text-emerald" id="legend-paid-count">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: var(--color-amber);"></span>
+                                    <span class="legend-label">Cicil</span>
+                                    <span class="legend-value" style="color:var(--color-amber)"
+                                        id="legend-partial-count">0</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot" style="background: var(--color-rose);"></span>
+                                    <span class="legend-label">Belum Bayar</span>
+                                    <span class="legend-value text-rose" id="legend-unpaid-count">0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Dashboard Content Rows -->
                 <div class="dashboard-rows">
-                    <!-- Progress Card -->
-                    <div class="card card-half">
-                        <div class="card-header">
-                            <h3>Kemajuan Pembayaran</h3>
-                        </div>
-                        <div class="card-body progress-container">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar-fill" id="dashboard-progress-fill" style="width: 0%"></div>
+                    <!-- Left Column (Progress & Settings) -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Progress Card -->
+                        <div class="card" style="margin-bottom: 0;">
+                            <div class="card-header">
+                                <h3>Kemajuan Pembayaran</h3>
                             </div>
-                            <div class="progress-stats">
-                                <span class="progress-text" id="dashboard-progress-text">0% Selesai</span>
-                                <span class="progress-details" id="dashboard-progress-detail">0 dari 0 Anggota</span>
+                            <div class="card-body progress-container">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill" id="dashboard-progress-fill" style="width: 0%"></div>
+                                </div>
+                                <div class="progress-stats">
+                                    <span class="progress-text" id="dashboard-progress-text">0% Selesai</span>
+                                    <span class="progress-details" id="dashboard-progress-detail">0 dari 0
+                                        Anggota</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Target Setting Card -->
+                        <div class="card" style="margin-bottom: 0;">
+                            <div class="card-header">
+                                <h3>Pengaturan Target Iuran</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label for="dashboard-target-amount">Target Nominal Lunas:</label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="number" id="dashboard-target-amount" placeholder="Contoh: 300000"
+                                            min="0" step="10000" style="flex: 1; margin: 0;">
+                                        <button class="btn btn-emerald" id="btn-save-target"
+                                            style="padding: 12px 20px;">Simpan</button>
+                                    </div>
+                                    <span class="form-help">Masukkan nominal total agar status iuran anggota dihitung
+                                        Lunas.</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -157,7 +333,8 @@
                                     <tbody>
                                         <!-- JS will populate -->
                                         <tr>
-                                            <td colspan="4" class="text-center text-muted">Belum ada data pembayaran terbaru</td>
+                                            <td colspan="4" class="text-center text-muted">Belum ada data pembayaran
+                                                terbaru</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -172,11 +349,19 @@
                 <div class="card">
                     <div class="card-actions-header">
                         <div class="search-box">
-                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
                             <input type="text" id="search-members-input" placeholder="Cari nama anggota...">
                         </div>
                         <button class="btn btn-emerald" id="btn-add-member">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
                             <span>Tambah Anggota</span>
                         </button>
                     </div>
@@ -185,6 +370,7 @@
                             <table class="table" id="table-members">
                                 <thead>
                                     <tr>
+                                        <th>No.</th>
                                         <th>Nama Lengkap</th>
                                         <th>No. WhatsApp</th>
                                         <th>Nominal Iuran</th>
@@ -205,7 +391,11 @@
                 <div class="card">
                     <div class="card-actions-header">
                         <div class="search-box">
-                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
                             <input type="text" id="search-payments-input" placeholder="Cari nama...">
                         </div>
                         <div class="filter-buttons">
@@ -219,11 +409,10 @@
                             <table class="table" id="table-payments-registry">
                                 <thead>
                                     <tr>
+                                        <th>No.</th>
                                         <th>Nama Anggota</th>
-                                        <th>Iuran Bulanan</th>
+                                        <th>Iuran Terbayar</th>
                                         <th>Status</th>
-                                        <th>Tanggal Bayar</th>
-                                        <th>Catatan</th>
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
@@ -247,7 +436,8 @@
                         <div class="card-body">
                             <div class="form-group">
                                 <label for="wa-template-input">Isi Pesan Tagihan:</label>
-                                <textarea id="wa-template-input" rows="8" placeholder="Tulis template pesan di sini..."></textarea>
+                                <textarea id="wa-template-input" rows="8"
+                                    placeholder="Tulis template pesan di sini..."></textarea>
                             </div>
                             <div class="template-variables">
                                 <span class="var-label">Variabel Instan (Klik untuk memasukkan):</span>
@@ -258,7 +448,12 @@
                                 </div>
                             </div>
                             <button class="btn btn-indigo btn-block" id="btn-save-template">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                                    <polyline points="17 21 17 13 7 13 7 21" />
+                                    <polyline points="7 3 7 8 15 8" />
+                                </svg>
                                 <span>Simpan Template</span>
                             </button>
 
@@ -306,26 +501,41 @@
                             <h3>Ekspor & Impor Data</h3>
                         </div>
                         <div class="card-body">
-                            <p class="backup-desc">Data sistem ini disimpan di dalam browser laptop/HP Anda. Untuk mencegah kehilangan data akibat pembersihan browser, atau untuk memindahkan data ke perangkat lain, silakan gunakan fitur cadangan berikut.</p>
-                            
+                            <p class="backup-desc">Data sistem ini disimpan di dalam browser laptop/HP Anda. Untuk
+                                mencegah kehilangan data akibat pembersihan browser, atau untuk memindahkan data ke
+                                perangkat lain, silakan gunakan fitur cadangan berikut.</p>
+
                             <div class="backup-actions">
                                 <div class="backup-box">
                                     <div class="backup-box-icon text-emerald">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="7 10 12 15 17 10" />
+                                            <line x1="12" y1="15" x2="12" y2="3" />
+                                        </svg>
                                     </div>
                                     <h4>Cadangkan Data (Ekspor)</h4>
-                                    <p>Unduh semua data anggota dan riwayat pembayaran saat ini dalam bentuk satu file JSON.</p>
+                                    <p>Unduh semua data anggota dan riwayat pembayaran saat ini dalam bentuk satu file
+                                        JSON.</p>
                                     <button class="btn btn-emerald" id="btn-export-data">Unduh File Cadangan</button>
                                 </div>
 
                                 <div class="backup-box">
                                     <div class="backup-box-icon text-indigo">
-                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                            <polyline points="17 8 12 3 7 8" />
+                                            <line x1="12" y1="3" x2="12" y2="15" />
+                                        </svg>
                                     </div>
                                     <h4>Pulihkan Data (Impor)</h4>
-                                    <p>Unggah kembali file JSON hasil cadangan sebelumnya untuk memulihkan seluruh data sistem.</p>
+                                    <p>Unggah kembali file JSON hasil cadangan sebelumnya untuk memulihkan seluruh data
+                                        sistem.</p>
                                     <input type="file" id="import-file-input" accept=".json" style="display: none;">
-                                    <button class="btn btn-indigo" id="btn-import-trigger">Pilih File & Pulihkan</button>
+                                    <button class="btn btn-indigo" id="btn-import-trigger">Pilih File &
+                                        Pulihkan</button>
                                 </div>
                             </div>
                         </div>
@@ -404,4 +614,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>
