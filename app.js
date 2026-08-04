@@ -274,6 +274,8 @@ function renderAll() {
     renderMembersTable();
     renderPaymentsRegistryTable();
     renderWaUnpaidTable();
+    populatePreviewMemberSelect();
+    updateTemplatePreview();
 }
 
 // 1. Dashboard Tab
@@ -354,6 +356,53 @@ function renderDashboard() {
             `;
             recentTableBody.appendChild(row);
         });
+    }
+
+    // Dashboard Member Summary Table
+    const summaryPeriodLabel = document.getElementById('dashboard-summary-period-label');
+    if (summaryPeriodLabel) summaryPeriodLabel.textContent = `Periode: ${activePeriodName}`;
+
+    const summaryTableBody = document.querySelector('#table-dashboard-member-summary tbody');
+    if (summaryTableBody) {
+        summaryTableBody.innerHTML = '';
+        if (state.members.length === 0) {
+            summaryTableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="padding: 24px;">Belum ada anggota terdaftar</td></tr>';
+        } else {
+            state.members.forEach((member, index) => {
+                const memberPayments = activePayments.filter(p => p.memberId === member.id);
+                const totalPaid = memberPayments.reduce((sum, p) => sum + parseInt(p.amount, 10), 0);
+                const remaining = targetAmount - totalPaid;
+
+                let statusBadge = '';
+                let remainingText = '';
+
+                if (totalPaid >= targetAmount) {
+                    statusBadge = `<span class="badge badge-paid">✓ Lunas</span>`;
+                    remainingText = `<span class="text-emerald" style="font-weight:600;">Lunas</span>`;
+                } else if (totalPaid > 0) {
+                    statusBadge = `<span class="badge badge-partial">⏳ Belum Lunas</span>`;
+                    remainingText = `<span class="text-rose font-weight-600">Kurang ${formatRupiah(remaining)}</span>`;
+                } else {
+                    statusBadge = `<span class="badge badge-unpaid">✗ Belum Bayar</span>`;
+                    remainingText = `<span class="text-rose font-weight-600">Kurang ${formatRupiah(targetAmount)}</span>`;
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="col-no" data-label="No.">${index + 1}.</td>
+                    <td data-label="Nama Anggota">
+                        <div class="member-name-cell">${makeAvatar(member.name)}<strong>${member.name}</strong></div>
+                    </td>
+                    <td data-label="Status Bayar">
+                        <span style="font-weight:700;">${formatRupiah(totalPaid)}</span>
+                        <span class="text-muted"> / ${formatRupiah(targetAmount)}</span>
+                    </td>
+                    <td data-label="Sisa Pembayaran">${remainingText}</td>
+                    <td data-label="Status">${statusBadge}</td>
+                `;
+                summaryTableBody.appendChild(row);
+            });
+        }
     }
 }
 
@@ -604,17 +653,62 @@ window.copyWaMessage = function(btn, msg) {
     }).catch(() => showToast('Gagal menyalin pesan.', 'error'));
 };
 
+// Populate the preview member dropdown
+function populatePreviewMemberSelect() {
+    const select = document.getElementById('preview-member-select');
+    if (!select) return;
+
+    const prevValue = select.value;
+    select.innerHTML = '<option value="">-- Pilih Anggota --</option>';
+
+    state.members.forEach(member => {
+        const opt = document.createElement('option');
+        opt.value = member.id;
+        opt.textContent = member.name;
+        select.appendChild(opt);
+    });
+
+    // Restore previous selection if still valid, else auto-select first member
+    if (prevValue && state.members.find(m => m.id === prevValue)) {
+        select.value = prevValue;
+    } else if (state.members.length > 0) {
+        select.value = state.members[0].id;
+    }
+}
+
 // Template Input Preview Live Update
 function updateTemplatePreview() {
-    const templateInput = document.getElementById('wa-template-input').value;
+    const templateInput = document.getElementById('wa-template-input');
+    if (!templateInput) return;
+    const templateText = templateInput.value;
     const previewContent = document.getElementById('template-preview-text');
-    
-    // Sample details for preview
-    const sampleName = "Budi Santoso";
-    const sampleAmount = 50000;
-    const samplePeriod = formatPeriod(state.activePeriod);
+    const select = document.getElementById('preview-member-select');
+    const targetAmount = state.settings.targetAmount || 300000;
 
-    const formatted = parseTemplate(templateInput, sampleName, sampleAmount, samplePeriod);
+    let previewName, previewAmount, previewPeriod;
+
+    const selectedId = select ? select.value : '';
+    const selectedMember = state.members.find(m => m.id === selectedId);
+
+    if (selectedMember) {
+        // Use real member data
+        const activePayments = state.payments.filter(
+            p => p.period === state.activePeriod && p.memberId === selectedMember.id
+        );
+        const totalPaid = activePayments.reduce((s, p) => s + parseInt(p.amount, 10), 0);
+        const remaining = Math.max(0, targetAmount - totalPaid);
+
+        previewName   = selectedMember.name;
+        previewAmount = remaining > 0 ? remaining : targetAmount;
+        previewPeriod = formatPeriod(state.activePeriod);
+    } else {
+        // Fallback to sample data when no member selected
+        previewName   = 'Nama Anggota';
+        previewAmount = targetAmount;
+        previewPeriod = formatPeriod(state.activePeriod);
+    }
+
+    const formatted = parseTemplate(templateText, previewName, previewAmount, previewPeriod);
     previewContent.textContent = formatted;
 }
 
@@ -886,6 +980,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Live update preview on keyup
     templateInput.addEventListener('keyup', updateTemplatePreview);
+
+    // Member selector in preview
+    const previewSelect = document.getElementById('preview-member-select');
+    if (previewSelect) {
+        previewSelect.addEventListener('change', updateTemplatePreview);
+    }
 
     // Save Template
     document.getElementById('btn-save-template').addEventListener('click', () => {

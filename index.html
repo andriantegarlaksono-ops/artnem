@@ -283,12 +283,15 @@
                             </div>
                             <div class="card-body" style="padding-top: 8px;">
                                 <div class="progress-container">
-                                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:4px;">
+                                    <div
+                                        style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:4px;">
                                         <span class="progress-text" id="dashboard-progress-text">0% Selesai</span>
-                                        <span class="progress-details" id="dashboard-progress-detail">0 dari 0 Anggota</span>
+                                        <span class="progress-details" id="dashboard-progress-detail">0 dari 0
+                                            Anggota</span>
                                     </div>
                                     <div class="progress-bar-container">
-                                        <div class="progress-bar-fill" id="dashboard-progress-fill" style="width: 0%"></div>
+                                        <div class="progress-bar-fill" id="dashboard-progress-fill" style="width: 0%">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -340,6 +343,32 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ringkasan Status Anggota Simple Table -->
+                <div class="card card-full" style="margin-top: 24px;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Ringkasan Status Iuran Anggota</h3>
+                        <span class="text-muted" style="font-size: 0.85rem;" id="dashboard-summary-period-label">Agustus 2026</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table" id="table-dashboard-member-summary">
+                                <thead>
+                                    <tr>
+                                        <th class="col-no">No.</th>
+                                        <th>Nama Anggota</th>
+                                        <th>Status Bayar (Terbayar / Target)</th>
+                                        <th>Sisa Pembayaran</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- JS will populate -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -459,7 +488,19 @@
                             </button>
 
                             <div class="template-preview-box">
-                                <h4>Pratinjau Pesan Terformat:</h4>
+                                <div class="preview-header">
+                                    <h4>Pratinjau Pesan Terformat:</h4>
+                                    <div class="preview-selector">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                            <circle cx="9" cy="7" r="4" />
+                                        </svg>
+                                        <select id="preview-member-select">
+                                            <option value="">-- Pilih Anggota --</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="preview-content" id="template-preview-text">
                                     <!-- Dynamic Preview -->
                                 </div>
